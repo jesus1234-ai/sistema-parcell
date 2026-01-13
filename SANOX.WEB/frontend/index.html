@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de administracion Parcell C.A</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-active">
+
+    <div class="login-container" id="loginView">
+        <div class="robot-container">
+            <div class="dream-cloud" id="dream-cloud"><div class="dream-code">01010011</div></div>
+            <div class="robot" id="robot">
+                <div class="robot-head" id="head"><div class="ear left"></div><div class="ear right"></div><div class="face"><div class="eyes"><div class="eye-light"></div><div class="eye-light"></div></div><div class="mouth"></div></div></div>
+                <div class="robot-body" id="body"><div class="chest-logo">parcell.c.a</div></div>
+            </div>
+        </div>
+        <main class="login-wrapper">
+            <div class="form-container">
+                <h2>Iniciar Sesión</h2>
+                <form id="login-form">
+                    <input type="text" id="login-username" placeholder="Usuario" required>
+                    <div class="password-container">
+                        <input type="password" id="login-password" placeholder="Contraseña" required>
+                        <i class="fas fa-eye toggle-password" id="toggleLoginPass"></i>
+                    </div>
+                    <p id="login-error" class="error-message"></p>
+                    <button type="submit">Ingresar</button>
+                    <p class="toggle-link">¿No tienes cuenta? <a id="show-register">Regístrate</a></p>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <div class="register-container hidden" id="registerView">
+        <main class="login-wrapper">
+            <div class="form-container">
+                <h2>Crear Cuenta</h2>
+                <form id="register-form">
+                    <input type="text" id="register-username" placeholder="Nuevo Usuario" required>
+                    <div class="password-container">
+                        <input type="password" id="register-password" placeholder="Nueva Contraseña" required>
+                        <i class="fas fa-eye toggle-password" id="toggleRegisterPass"></i>
+                    </div>
+                    <select id="register-role" required>
+                        <option value="usuario">Usuario</option>
+                        <option value="moderador">Moderador</option>
+                        <option value="administrador">Administrador</option>
+                    </select>
+                    <div class="password-container hidden" id="admin-key-group">
+                        <input type="password" id="register-admin-key" placeholder="Clave de Administrador">
+                        <i class="fas fa-eye toggle-password" id="toggleAdminKey"></i>
+                        <small>Requerida para registrarse como Moderador o Administrador.</small>
+                    </div>
+                    <p id="register-error" class="error-message"></p>
+                    <button type="submit">Registrarse</button>
+                    <p class="toggle-link">¿Ya tienes cuenta? <a id="show-login">Inicia sesión</a></p>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    
+    <div class="main-container" id="mainContainer">
+    
+        <div class="sidebar">
+            <div class="profile-section" id="profileSection">
+                <span class="default-avatar"><i class="fas fa-user"></i></span>
+                <img id="profilePicture">
+                <button class="profile-upload-btn" onclick="document.getElementById('profileInput').click()">
+                    <i class="fas fa-plus" style="font-size: 10px;"></i>
+                </button>
+                <input type="file" id="profileInput" accept="image/*" onchange="loadProfilePicture(event)">
+            </div>
+            
+            <div class="profile-info">
+                <span id="profileUsername" class="profile-username"></span>
+                <span id="profileRole" class="profile-role"></span>
+            </div>
+            
+            <div id="cartIcon" class="sidebar-item" onclick="openCartModal()" style="display: none;">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Carrito</span>
+                <span id="cartCountBadge">0</span>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="sidebar-item has-submenu" onclick="toggleSubmenu(this)">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Garantías</span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="submenu">
+                    <a class="sidebar-item submenu-item" onclick="showSection('garantias', this)">
+                        <i class="fas fa-plus-circle"></i> <span>Crear Garantía</span>
+                    </a>
+                    <a class="sidebar-item submenu-item" onclick="showSection('buzonGarantias', this)">
+                        <i class="fas fa-inbox"></i> <span>Buzón Garantías</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-item has-submenu" onclick="toggleSubmenu(this)">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Facturación</span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="submenu">
+                    <a class="sidebar-item submenu-item" onclick="showSection('facturacion', this)">
+                        <i class="fas fa-plus-circle"></i> <span>Crear Factura</span>
+                    </a>
+                    <a class="sidebar-item submenu-item" onclick="showSection('buzonFacturas', this)">
+                        <i class="fas fa-archive"></i> <span>Buzón Facturas</span>
+                    </a>
+                </div>
+                
+                <a class="sidebar-item" id="inbox-sidebar-item" onclick="openInboxModal()">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>Buzón de Pedidos</span>
+                    <span id="inboxCountBadge">0</span>
+                </a>
+                <a class="sidebar-item" id="pos-sidebar-item" style="display: none;" onclick="showSection('pos', this)">
+                    <i class="fas fa-store"></i>
+                    <span>Tienda / POS</span>
+                </a>
+                
+                <a class="sidebar-item" id="almacen-sidebar-item" style="display: none;" onclick="showSection('almacen', this)">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Almacén</span>
+                </a>
+                
+                <a class="sidebar-item" onclick="showSection('opciones-informes', this)">
+                    <i class="fas fa-list-alt"></i>
+                    <span>Opciones de Informes</span>
+                </a>
+
+                <a class="sidebar-item" id="cuentas-sidebar-item" style="display: none;" onclick="showSection('cuentas', this)">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Cuentas</span>
+                </a>
+            </div>
+            
+            <div class="logout-section">
+                <a class="sidebar-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="content">
+        
+            <div id="garantiasSection" style="display: none;">
+                <div class="header-section"><h1>Sistema de Administración de Garantías</h1></div>
+                <div class="form-row">
+                    <div class="form-group"><label for="gar_numeroFactura">Número de Factura de Origen:</label><input type="text" id="gar_numeroFactura" placeholder="N° de Factura del Equipo"></div>
+                    <div class="form-group"><label for="gar_sedeFacturacion">Sede:</label><select id="gar_sedeFacturacion"></select></div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group"><label for="gar_fechaEmisionGarantia">Fecha de Emisión de la Garantía:</label><input type="date" id="gar_fechaEmisionGarantia"></div>
+                    <div class="form-group"><label for="gar_fechaEmisionFactura">Fecha de Emisión de la Factura Original:</label><input type="date" id="gar_fechaEmisionFactura"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gar_tipoCliente">Tipo de Cliente:</label>
+                        <select id="gar_tipoCliente" onchange="toggleClienteFields('gar_')">
+                            <option value="interno">Interno</option><option value="externo">Externo</option>
+                        </select>
+                    </div>
+                     <div class="form-group"><label for="gar_cliente">Cliente:</label><input type="text" id="gar_cliente" value="PARCELL SOLUTIONS INTERNATIONAL, C.A"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group hidden" id="gar_telefonoGroup"><label for="gar_telefono">Teléfono:</label><input type="text" id="gar_telefono" placeholder="Teléfono"></div>
+                    <div class="form-group hidden" id="gar_correoGroup"><label for="gar_correo">Correo:</label><input type="email" id="gar_correo" placeholder="Correo"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="gar_rif">RIF:</label><input type="text" id="gar_rif" value="J503787654"></div>
+                    <div class="form-group"><label for="gar_direccion">Dirección del Cliente:</label><input type="text" id="gar_direccion" value="CENTRO DE VALENCIA CC GRAN BAZAR"></div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group"><label for="gar_condicion">Condición:</label><input type="text" id="gar_condicion" value="Crédito 30 días"></div>
+                    <div class="form-group"><label for="gar_costo">Número de Equipo/Piezas Total:</label><input type="number" id="gar_costo" placeholder="Total de equipos"></div>
+                </div>
+                <div class="form-row">
+                     <div class="form-group"><label for="gar_enviaA">Envía:</label><input type="text" id="gar_enviaA" placeholder="Persona o sede que envía"></div>
+                    <div class="form-group"><label for="gar_recibeA">Recibe:</label><input type="text" id="gar_recibeA" placeholder="Persona o sede que recibe"></div>
+                </div>
+                <div class="form-row">
+                     <div class="form-group">
+                        <label>Equipos:</label>
+                        <div class="multi-input-group">
+                            <input type="text" id="gar_nuevoEquipoInput" list="equiposDataList" placeholder="Selecciona o escribe un equipo...">
+                            <button class="add-product" onclick="agregarItemALista('equipo')">Agregar</button>
+                        </div>
+                        <div id="gar_listaEquipos" class="item-list"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Especificaciones de Daño:</label>
+                        <div class="multi-input-group">
+                            <input type="text" id="gar_nuevoDanoInput" list="danosDataList" placeholder="Selecciona o describe un daño...">
+                            <button class="add-product" onclick="agregarItemALista('dano')">Agregar</button>
+                        </div>
+                        <div id="gar_listaDanos" class="item-list"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="gar_moneda">Moneda:</label><select id="gar_moneda"><option value="bolivares">Bolívares</option><option value="dolares">Dólares</option><option value="euros">Euros</option></select></div>
+                </div>
+                <h3>Agregar Producto/Servicio a la Garantía</h3>
+                <div class="form-row">
+                    <div class="form-group"><label for="gar_cantidad">Cantidad:</label><input type="number" id="gar_cantidad" placeholder="Cantidad"></div>
+                    <div class="form-group"><label for="gar_codigoProducto">Código:</label><input type="text" id="gar_codigoProducto" placeholder="Código o serial"></div>
+                    <div class="form-group"><label for="gar_nombreProducto">Nombre del Producto/Servicio:</label><input type="text" id="gar_nombreProducto" placeholder="Nombre del Producto"></div>
+                    <div class="form-group"><label for="gar_precioUnitario">Costo Unitario:</label><input type="number" id="gar_precioUnitario" placeholder="costo Unitario"></div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;"><button class="add-product" onclick="agregarProducto('garantia')">Agregar</button></div>
+                </div>
+                <h3>Items de la Garantía</h3>
+                <div class="table-container">
+                    <table id="garantiaFacturaTable">
+                        <thead><tr><th>Cantidad</th><th>Código</th><th>Nombre</th><th>Precio Unitario</th><th>Subtotal</th><th>Acciones</th></tr></thead>
+                        <tbody id="garantiaFacturaBody"></tbody>
+                        <tfoot><tr class="totals-row"><td colspan="5" style="text-align:right;"><strong>Total:</strong></td><td id="garantiaTotal">0.00</td></tr></tfoot>
+                    </table>
+                </div>
+                <div class="button-group">
+                    <button class="save-invoice" onclick="guardarGarantia()">Guardar Nota de Garantía</button>
+                </div>
+            </div>
+            
+            <div id="facturacionSection" style="display: none;">
+                <div class="header-section"><h1 style="color: #007bff;">Sistema de Facturación</h1></div>
+                <div class="compact-form-grid">
+                    <div class="form-group"><label for="fact_numeroFactura">Número de Factura:</label><input type="text" id="fact_numeroFactura" placeholder="N° de Factura"></div>
+                    <div class="form-group"><label for="fact_numeroControl">Número de Control:</label><input type="text" id="fact_numeroControl" placeholder="N° de Control"></div>
+                    <div class="form-group"><label for="fact_sedeFacturacion">Sede:</label><select id="fact_sedeFacturacion"></select></div>
+                    <div class="form-group"><label for="fact_fechaEmision">Fecha de Emisión:</label><input type="date" id="fact_fechaEmision"></div>
+                    <div class="form-group">
+                        <label for="fact_tipoCliente">Tipo de Cliente:</label>
+                        <select id="fact_tipoCliente" onchange="toggleClienteFields('fact_')">
+                            <option value="interno">Interno</option><option value="externo">Externo</option>
+                        </select>
+                    </div>
+                     <div class="form-group"><label for="fact_cliente">Cliente:</label><input type="text" id="fact_cliente" value="PARCELL SOLUTIONS INTERNATIONAL, C.A"></div>
+                    <div class="form-group hidden" id="fact_telefonoGroup"><label for="fact_telefono">Teléfono:</label><input type="text" id="fact_telefono" placeholder="Teléfono"></div>
+                    <div class="form-group hidden" id="fact_correoGroup"><label for="fact_correo">Correo:</label><input type="email" id="fact_correo" placeholder="Correo"></div>
+                    <div class="form-group"><label for="fact_rif">RIF:</label><input type="text" id="fact_rif" value="J503787654"></div>
+                    <div class="form-group"><label for="fact_direccion">Dirección:</label><input type="text" id="fact_direccion" value="CENTRO DE VALENCIA CC GRAN BAZAR"></div>
+                    <div class="form-group">
+                        <label for="fact_metodoPago">Método de Pago:</label>
+                        <input type="text" id="fact_metodoPago" list="metodoPagoDataList" placeholder="Selecciona o escribe un método...">
+                    </div>
+                     <div class="form-group"><label for="fact_moneda">Moneda:</label><select id="fact_moneda"><option value="bolivares">Bolívares</option><option value="dolares">Dólares</option><option value="euros">Euros</option></select></div>
+                </div>
+                <h3>Agregar Producto/Servicio a la Factura</h3>
+                <div class="compact-form-grid" style="align-items: flex-end;">
+                    <div class="form-group"><label for="fact_cantidad">Cantidad:</label><input type="number" id="fact_cantidad" placeholder="Cant."></div>
+                    <div class="form-group" style="flex:1.5;"><label for="fact_codigoProducto">Código:</label><input type="text" id="fact_codigoProducto" placeholder="Código o serial" oninput="autocompletarProductoFacturaPorCodigo()"></div>
+                    <div class="form-group" style="flex:3;"><label for="fact_nombreProducto">Nombre del Producto/Servicio:</label>
+                        <input type="text" id="fact_nombreProducto" placeholder="Nombre del Producto" list="factProductNamesDataList" oninput="autocompletarProductoFacturaPorNombre()">
+                    </div>
+                    <div class="form-group" style="flex:1.5;"><label for="fact_precioUnitario">Precio Unitario:</label><input type="number" id="fact_precioUnitario" placeholder="Precio"></div>
+                    <div class="form-group"><button class="add-product" onclick="agregarProducto('factura')">Agregar</button></div>
+                </div>
+                <h3>Items de la Factura</h3>
+                <div class="table-container">
+                    <table id="facturaTable">
+                        <thead><tr><th>Cantidad</th><th>Código</th><th>Nombre</th><th>Precio Unitario</th><th>Subtotal</th><th>Acciones</th></tr></thead>
+                        <tbody id="facturaBody"></tbody>
+                        <tfoot><tr class="totals-row"><td colspan="5" style="text-align:right;"><strong>Total:</strong></td><td id="facturaTotal">0.00</td></tr></tfoot>
+                    </table>
+                </div>
+                <div class="button-group">
+                    <button class="save-invoice" style="background: #007bff;" onclick="guardarFactura()">Guardar Factura</button>
+                </div>
+            </div>
+            
+            <div id="posSection" style="display: none;">
+                <div class="header-section">
+                    <h1 style="color: #28a745;">Tienda / Punto de Venta</h1>
+                </div>
+                
+                <div class="pos-header">
+                    <div class="form-group">
+                        <label for="pos_sedeSelector">Seleccione un Almacén/Sede para vender:</label>
+                        <select id="pos_sedeSelector" onchange="displayProducts(this.value)">
+                            <option value="">Seleccione una sede...</option>
+                        </select>
+                    </div>
+                    <input type="text" id="pos_productSearch" placeholder="Buscar por nombre o código..." oninput="filterDisplayedProducts()" style="display: none;">
+                </div>
+
+                <div id="posProductGrid">
+                    </div>
+            </div>
+            <div id="buzonGarantiasSection" class="buzon-container">
+                 <div class="header-section" style="margin-bottom: 15px; border-bottom: none;">
+                    <h2>Buzón de Garantías</h2>
+                    <div class="button-group" style="margin: 0;">
+                        <button class="export-pdf" onclick="exportarTodoPDF('garantias')"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <button class="export-excel" onclick="exportarTodoExcel('garantias')"><i class="fas fa-file-excel"></i> Excel</button>
+                    </div>
+                </div>
+                <div class="sede-selector">
+                    <label for="sedeSelector_garantias">Filtrar por Sede:</label>
+                    <select id="sedeSelector_garantias" onchange="cargarBuzon('garantias')"><option value="Todas">Todas</option></select>
+                </div>
+                <div id="buzonContent_garantias"></div>
+            </div>
+            
+            <div id="buzonFacturasSection" class="buzon-container">
+                 <div class="header-section" style="margin-bottom: 15px; border-bottom: none;">
+                    <h2 style="color: #007bff;">Buzón de Facturas</h2>
+                    <div class="button-group" style="margin: 0;">
+                        <button class="export-pdf" onclick="exportarTodoPDF('facturas')"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <button class="export-excel" onclick="exportarTodoExcel('facturas')"><i class="fas fa-file-excel"></i> Excel</button>
+                    </div>
+                </div>
+                <div class="sede-selector">
+                    <label for="sedeSelector_facturas">Filtrar por Sede:</label>
+                    <select id="sedeSelector_facturas" onchange="cargarBuzon('facturas')"><option value="Todas">Todas</V></select>
+                </div>
+                <div id="buzonContent_facturas"></div>
+            </div>
+
+            <div id="opcionesInformesSection" class="report-options-container">
+                <h2>Opciones de Informes</h2>
+                 <p>Agrega aquí opciones que aparecerán automáticamente en los menús desplegables.</p>
+                <div class="report-options-form">
+                    <div class="report-options-row">
+                        <div class="report-options-group">
+                            <label for="nuevaOpcionTipo">Tipo de Opción:</label>
+                            <select id="nuevaOpcionTipo">
+                                <option value="sede">Sede</option>
+                                <option value="equipo">Equipo (Garantía)</option>
+                                <option value="especificacion">Especificación de Daño (Garantía)</option>
+                                <option value="metodoPago">Método de Pago (Factura)</option>
+                            </select>
+                        </div>
+                        <div class="report-options-group">
+                            <label for="nuevaOpcionValor">Opción:</label>
+                            <input type="text" id="nuevaOpcionValor" placeholder="Nueva opción">
+                        </div>
+                        <div class="report-options-group" style="align-self: flex-end;">
+                            <button class="add-product" onclick="agregarOpcionInforme()">Agregar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="report-options-list">
+                    <h3>Opciones Guardadas</h3>
+                    <datalist id="equiposDataList"></datalist>
+                    <datalist id="danosDataList"></datalist>
+                    <datalist id="metodoPagoDataList"></datalist>
+                    <datalist id="factProductNamesDataList"></datalist>
+                    <div id="opcionesGuardadas"></div>
+                </div>
+            </div>
+            
+            <div id="almacenSection" style="display: none;">
+                <div class="header-section">
+                    <h1 style="color: var(--primary-color);">Gestión de Almacén</h1>
+                </div>
+                <p>Crea almacenes (basados en las sedes) y añade productos a su inventario.</p>
+                
+                <div class="almacen-creator-form">
+                    <div class="form-group">
+                        <label for="almacen_nuevaSede">Crear Almacén para la Sede:</label>
+                        <select id="almacen_nuevaSede"></select>
+                    </div>
+                    <button class="add-product" onclick="agregarAlmacen()">
+                        <i class="fas fa-plus"></i> Crear Almacén
+                    </button>
+                </div>
+                
+                <div id="almacenesListContainer">
+                    </div>
+            </div>
+            
+            <div id="cuentasSection" style="display: none;">
+                <div class="header-section">
+                    <h1 style="color: var(--error-color);">Gestión de Cuentas</h1>
+                </div>
+                <p>Aquí puedes ver y eliminar usuarios del sistema. No puedes eliminar al administrador raíz (sano4D) ni a ti mismo.</p>
+                <div id="cuentasListContainer" style="margin-top: 20px;">
+                    </div>
+            </div>
+            
+        </div> 
+    </div> 
+    
+    <div class="copyright">
+        © Todos los derechos reservados | Código desarrollado por <strong>sano4Dprogramer</strong>
+    </div>
+
+    <div id="inboxModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Buzón de Pedidos</h2>
+                <button class="modal-close" onclick="closeInboxModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="inboxModalBody">
+                <p id="inboxEmptyMessage">No hay pedidos nuevos.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="cartModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Tu Carrito</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="cartModalBody">
+                <p id="cartEmptyMessage">Tu carrito está vacío.</p>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-total">Total: <span id="cartModalTotal">0.00</span></div>
+                <button id="modalCheckoutBtn" class="modal-checkout-btn" onclick="checkout()" disabled>
+                    <i class="fas fa-cash-register"></i> Proceder al Pago
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js" defer></script>
+
+</body>
+</html>
